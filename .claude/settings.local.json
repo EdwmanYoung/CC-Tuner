@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -rf D:/02_private/CC-Tuner/release/win-unpacked/resources/app/dist/*)",
+      "Bash(cp -r D:/02_private/CC-Tuner/dist/* D:/02_private/CC-Tuner/release/win-unpacked/resources/app/dist/)",
+      "Bash(rm -rf \"D:/02_private/CC-Tuner/release/win-unpacked/resources/app-extracted/dist\"/*)",
+      "Bash(cp -r D:/02_private/CC-Tuner/dist/* \"D:/02_private/CC-Tuner/release/win-unpacked/resources/app-extracted/dist/\")"
+    ]
+  }
+}

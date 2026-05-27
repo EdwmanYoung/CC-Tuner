@@ -1,0 +1,28 @@
+# Dependencies
+node_modules/
+
+# Build output
+dist/
+dist-electron/
+release/
+.astro/
+
+# IDE
+.vscode/
+.idea/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Debug / temp
+*.log
+*.png
+electron-debug.log
+
+# User data / settings
+app-settings.json
+cc-tuner-store.json
+
+# Test data (contains API keys)
+test_claude/

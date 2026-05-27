@@ -1,0 +1,69 @@
+/* CC-Tuner Apple Design Tokens */
+
+:root {
+  /* Colors */
+  --color-canvas: #ffffff;
+  --color-canvas-parchment: #f5f5f7;
+  --color-surface-pearl: #fafafc;
+  --color-ink: #1d1d1f;
+  --color-ink-muted: #86868b;
+  --color-ink-muted-48: #7a7a7a;
+  --color-action-blue: #0066cc;
+  --color-focus-blue: #0071e3;
+  --color-hairline: rgba(0, 0, 0, 0.08);
+  --color-divider-soft: rgba(0, 0, 0, 0.04);
+  --color-success: #4CAF6A;
+  --color-error: #E85A5A;
+  --color-warning: #FFB020;
+
+  /* Typography */
+  --font-display: "SF Pro Display", "Inter", system-ui, -apple-system, sans-serif;
+  --font-text: "SF Pro Text", "Inter", system-ui, -apple-system, sans-serif;
+
+  --fs-body: 15px;
+  --fs-caption: 13px;
+  --fs-headline: 17px;
+  --fs-large: 20px;
+  --fs-display: 28px;
+
+  --fw-light: 300;
+  --fw-regular: 400;
+  --fw-medium: 500;
+  --fw-semibold: 600;
+
+  /* Spacing */
+  --space-xs: 8px;
+  --space-sm: 12px;
+  --space-md: 20px;
+  --space-lg: 32px;
+  --space-xl: 48px;
+
+  /* Border Radius */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 18px;
+  --radius-pill: 980px;
+
+  /* Shadows */
+  --shadow-product: 0 3px 5px rgba(0, 0, 0, 0.22), 0 5px 30px rgba(0, 0, 0, 0.08);
+  --shadow-sm: 0 1px 3px rgba(0, 0, 0, 0.06);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
+  --shadow-lg: 0 8px 24px rgba(0, 0, 0, 0.12);
+
+  /* Layout */
+  --titlebar-height: 38px;
+  --sidebar-width: 220px;
+  --statusbar-height: 28px;
+}
+
+[data-theme="dark"] {
+  --color-canvas: #1c1c1e;
+  --color-canvas-parchment: #2c2c2e;
+  --color-surface-pearl: #3a3a3c;
+  --color-ink: #f5f5f7;
+  --color-ink-muted: #98989d;
+  --color-ink-muted-48: #636366;
+  --color-hairline: rgba(255, 255, 255, 0.12);
+  --color-divider-soft: rgba(255, 255, 255, 0.06);
+  --color-shadow: rgba(0, 0, 0, 0.4);
+}

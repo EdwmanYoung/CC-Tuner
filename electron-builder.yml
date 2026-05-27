@@ -1,0 +1,17 @@
+appId: com.cc-tuner.app
+productName: CC-Tuner
+
+directories:
+  output: release
+  buildResources: resources
+
+files:
+  - dist/**
+  - dist-electron/**
+  - package.json
+
+win:
+  target:
+    - target: dir
+      arch: [x64]
+  sign: null
