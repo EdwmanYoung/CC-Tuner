@@ -40,17 +40,6 @@ function findClaudeCli(): boolean {
   }
 }
 
-/** Find Windows Terminal */
-function findWindowsTerminal(): string | null {
-  // Check if wt.exe is available
-  try {
-    execSync("where wt.exe 2>NUL", { stdio: "ignore" });
-    return "wt.exe";
-  } catch {
-    return null;
-  }
-}
-
 export class ShellService {
   async openClaude(): Promise<{ ok: boolean; message: string }> {
     return this.openClaudeInDir("");
@@ -97,14 +86,14 @@ export class ShellService {
     }
 
     const cwd = workDir || process.cwd();
-    const wtPath = findWindowsTerminal();
+    const gitBashPath = findGitBash();
 
-    // Priority 1: Windows Terminal (wt.exe) — best UX for interactive CLI
-    if (wtPath) {
-      const cmd = `cd /d "${cwd}" && claude`;
-      spawn(wtPath, ["cmd.exe", "/c", cmd], {
+    if (!gitBashPath) {
+      // Fallback: plain cmd.exe window
+      spawn("cmd.exe", ["/c", "start", "Claude Code", "cmd", "/k", `cd /d "${cwd}" && claude`], {
         detached: true,
         stdio: "ignore",
+        windowsHide: false,
       }).unref();
       return {
         ok: true,
@@ -112,30 +101,24 @@ export class ShellService {
       };
     }
 
-    // Priority 2: Git Bash with interactive shell
-    const gitBashPath = findGitBash();
-    if (gitBashPath) {
-      const bashDir = workDir ? `--cd="${workDir}"` : "";
-      // Use interactive bash: launch git-bash, then exec claude in it
-      spawn(gitBashPath, [bashDir, "--login", "-i", "-c", "claude"].filter(Boolean), {
-        detached: true,
-        cwd: cwd,
-        stdio: "ignore",
-      }).unref();
-      return {
-        ok: true,
-        message: workDir ? `已在 ${workDir} 启动 Claude Code (Git Bash)` : "Claude Code terminal opened (Git Bash)",
-      };
-    }
+    // Git Bash: use `cmd /c start` to open a visible window, --cd to enter
+    // the work directory, then winpty to bridge mintty with claude's TUI.
+    // winpty is bundled with Git for Windows (usr/bin/winpty.exe).
+    const gitRoot = gitBashPath.replace(/\\git-bash\.exe$/, "");
+    const winptyPath = `${gitRoot}\\usr\\bin\\winpty.exe`;
+    const winptyCmd = existsSync(winptyPath) ? `"${winptyPath}"` : "winpty";
+    const bashDir = workDir ? `--cd="${workDir}"` : "";
 
-    // Priority 3: Plain cmd.exe — start a new cmd window
-    spawn("cmd.exe", ["/c", "start", "Claude Code", "cmd", "/k", `cd /d "${cwd}" && claude`], {
+    const startCmd = `start "" "${gitBashPath}" ${bashDir} -c "${winptyCmd} claude"`;
+    spawn("cmd.exe", ["/c", startCmd], {
       detached: true,
       stdio: "ignore",
+      windowsHide: false,
     }).unref();
+
     return {
       ok: true,
-      message: workDir ? `已在 ${workDir} 启动 Claude Code` : "Claude Code terminal opened",
+      message: workDir ? `已在 ${workDir} 启动 Claude Code (Git Bash)` : "Claude Code terminal opened (Git Bash)",
     };
   }
 }
