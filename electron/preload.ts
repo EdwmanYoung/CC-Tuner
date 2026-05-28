@@ -55,4 +55,11 @@ contextBridge.exposeInMainWorld("api", {
     encryptionAvailable: () => ipcRenderer.invoke("system:encryption-available"),
     getVersion: () => ipcRenderer.invoke("system:get-version"),
   },
+
+  // Window controls
+  window: {
+    minimize: () => ipcRenderer.invoke("window:minimize"),
+    maximize: () => ipcRenderer.invoke("window:maximize"),
+    close: () => ipcRenderer.invoke("window:close"),
+  },
 });

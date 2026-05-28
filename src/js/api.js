@@ -80,3 +80,15 @@ export async function encryptionAvailable() {
 export async function getVersion() {
   return api.system.getVersion();
 }
+
+export async function windowMinimize() {
+  return api.window.minimize();
+}
+
+export async function windowMaximize() {
+  return api.window.maximize();
+}
+
+export async function windowClose() {
+  return api.window.close();
+}

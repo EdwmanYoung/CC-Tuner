@@ -181,6 +181,9 @@ function registerSystemIpcHandlers(): void {
   ipcMain.removeHandler("settings:get-config-dir");
   ipcMain.removeHandler("settings:set-config-dir");
   ipcMain.removeHandler("dialog:select-config-dir");
+  ipcMain.removeHandler("window:minimize");
+  ipcMain.removeHandler("window:maximize");
+  ipcMain.removeHandler("window:close");
 
   ipcMain.handle("settings:get-config-dir", async () => {
     const s = await settingsStore.load();
@@ -221,6 +224,26 @@ function registerSystemIpcHandlers(): void {
     securityService?.isEncryptionAvailable() ?? false,
   );
   ipcMain.handle("system:get-version", () => app.getVersion());
+
+  // Window controls
+  ipcMain.handle("window:minimize", () => {
+    const win = BrowserWindow.getFocusedWindow() || mainWindow;
+    win?.minimize();
+  });
+
+  ipcMain.handle("window:maximize", () => {
+    const win = BrowserWindow.getFocusedWindow() || mainWindow;
+    if (win?.isMaximized()) {
+      win.unmaximize();
+    } else {
+      win?.maximize();
+    }
+  });
+
+  ipcMain.handle("window:close", () => {
+    const win = BrowserWindow.getFocusedWindow() || mainWindow;
+    win?.close();
+  });
 }
 
 app.whenReady().then(async () => {

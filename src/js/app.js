@@ -7,6 +7,16 @@ import * as api from "./api.js";
 
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
+  // Window controls
+  document.querySelectorAll(".win-btn").forEach((btn) => {
+    btn.addEventListener("click", async () => {
+      const action = btn.dataset.action;
+      if (action === "minimize") await api.windowMinimize();
+      else if (action === "maximize") await api.windowMaximize();
+      else if (action === "close") await api.windowClose();
+    });
+  });
+
   // Theme
   initTheme();
   document.getElementById("themeToggle").addEventListener("click", () => {
