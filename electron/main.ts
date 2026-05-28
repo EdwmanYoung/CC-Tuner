@@ -68,12 +68,7 @@ function createWindow(): void {
     mainWindow.loadURL("http://localhost:4322");
     mainWindow.webContents.openDevTools();
   } else {
-    const indexPath = join(__dirname, "../dist/index.html");
-    console.log("[Main] Loading packaged index:", indexPath);
-    console.log("[Main] __dirname:", __dirname);
-    mainWindow.loadFile(indexPath);
-    // Open DevTools in packaged mode for debugging
-    mainWindow.webContents.openDevTools({ mode: "detach" });
+    mainWindow.loadFile(join(__dirname, "../../dist/index.html"));
   }
 
   mainWindow.once("ready-to-show", () => {
