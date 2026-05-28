@@ -59,13 +59,16 @@ body {
   border: none;
   background: transparent;
   color: var(--color-ink-muted);
-  font-size: 12px;
   cursor: pointer;
   border-radius: var(--radius-sm);
   display: flex;
   align-items: center;
   justify-content: center;
   transition: background 0.1s;
+}
+
+.win-btn svg {
+  flex-shrink: 0;
 }
 
 .win-btn:hover {
@@ -138,9 +141,15 @@ body {
 }
 
 .nav-icon {
-  font-size: 16px;
   width: 20px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: currentColor;
+}
+
+.nav-icon svg {
+  flex-shrink: 0;
 }
 
 .side-nav-footer {
@@ -158,6 +167,10 @@ body {
   border-radius: var(--radius-sm);
   cursor: pointer;
   transition: background 0.15s;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: center;
 }
 
 .theme-toggle:hover {
@@ -278,8 +291,13 @@ body {
 }
 
 .btn-icon {
-  font-size: 18px;
+  display: flex;
+  align-items: center;
   line-height: 1;
+}
+
+.btn-icon svg {
+  flex-shrink: 0;
 }
 
 .btn-sm {
@@ -348,6 +366,14 @@ body {
   font-weight: var(--fw-semibold);
   font-size: var(--fs-large);
   letter-spacing: -0.25px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.card-title svg {
+  flex-shrink: 0;
+  color: var(--color-action-blue);
 }
 
 .card-badge {
@@ -576,14 +602,20 @@ select.form-input {
   background: transparent;
   color: var(--color-ink-muted);
   cursor: pointer;
-  font-size: 16px;
   padding: 4px;
   border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .delete-env-btn:hover {
   color: var(--color-error);
   background: rgba(232, 90, 90, 0.08);
+}
+
+.delete-env-btn svg {
+  flex-shrink: 0;
 }
 
 .add-env-btn {
@@ -614,8 +646,18 @@ select.form-input {
   background: transparent;
   color: var(--color-ink-muted);
   cursor: pointer;
-  font-size: 16px;
   padding: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.api-key-wrapper .eye-toggle:hover {
+  color: var(--color-ink);
+}
+
+.api-key-wrapper .eye-toggle svg {
+  flex-shrink: 0;
 }
 
 .test-result {
@@ -661,6 +703,13 @@ select.form-input {
   font-weight: var(--fw-semibold);
   font-size: var(--fs-display);
   letter-spacing: -0.28px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-hero h2 svg {
+  flex-shrink: 0;
 }
 
 .detail-hero .provider {
@@ -770,7 +819,17 @@ select.form-input {
   font-weight: var(--fw-semibold);
   font-size: var(--fs-body);
   margin: 2px 0;
+  display: flex;
+  align-items: center;
+  gap: 4px;
 }
+
+.timeline-card .action svg {
+  flex-shrink: 0;
+}
+
+.timeline-card.action-create .action svg { color: var(--color-success); }
+.timeline-card.action-delete .action svg { color: var(--color-error); }
 
 .timeline-card .details {
   font-size: var(--fs-caption);
@@ -909,8 +968,13 @@ select.form-input {
 }
 
 .empty-state .icon {
-  font-size: 48px;
   margin-bottom: var(--space-md);
+  color: var(--color-ink-muted);
+}
+
+.empty-state .icon svg {
+  width: 48px;
+  height: 48px;
 }
 
 .empty-state h3 {
@@ -949,8 +1013,13 @@ select.form-input {
 }
 
 .setup-icon {
-  font-size: 56px;
   margin-bottom: var(--space-md);
+  color: var(--color-action-blue);
+}
+
+.setup-icon svg {
+  width: 56px;
+  height: 56px;
 }
 
 .setup-dialog h2 {
