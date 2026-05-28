@@ -5,6 +5,8 @@ node_modules/
 dist/
 dist-electron/
 release/
+release*/
+dist-output/
 .astro/
 
 # IDE

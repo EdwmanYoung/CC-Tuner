@@ -15,6 +15,7 @@ const result = await packager({
   electronVersion: "28.3.3",
   appCopyright: "CC-Tuner",
   appVersion: "0.1.0",
+  ignore: [/release\b/],
 });
 
 console.log("Packaged:", result);

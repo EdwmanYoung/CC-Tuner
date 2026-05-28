@@ -4,6 +4,7 @@ export default defineConfig({
   srcDir: "src",
   outDir: "dist",
   publicDir: "public",
+  base: "./",
   devToolbar: {
     enabled: false,
   },
