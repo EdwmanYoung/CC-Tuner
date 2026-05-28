@@ -82,13 +82,13 @@ export async function getVersion() {
 }
 
 export async function windowMinimize() {
-  return api.window.minimize();
+  return api.win.minimize();
 }
 
 export async function windowMaximize() {
-  return api.window.maximize();
+  return api.win.maximize();
 }
 
 export async function windowClose() {
-  return api.window.close();
+  return api.win.close();
 }
