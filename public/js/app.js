@@ -51,9 +51,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (result && !result.canceled && result.filePaths.length > 0) {
       const dir = result.filePaths[0];
       await api.setConfigDir(dir);
-      show("success", "配置目录已设置");
+      show("success", "配置目录已设置，已加载现有配置");
       hideSetupOverlay();
       await loadConfigDir();
+      await loadProfiles();
     }
   });
 

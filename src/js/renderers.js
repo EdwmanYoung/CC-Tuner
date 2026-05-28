@@ -729,6 +729,7 @@ export async function renderSettingsPage() {
   const version = await api.getVersion();
   const encAvail = await api.encryptionAvailable();
   const backups = await api.listBackups();
+  const configDir = await api.getConfigDir();
 
   container.innerHTML = `
     <h2 style="font-family: var(--font-display); font-weight: 600; font-size: var(--fs-display); letter-spacing: -0.28px; margin-bottom: var(--space-lg);">设置</h2>
@@ -770,7 +771,10 @@ export async function renderSettingsPage() {
       <h3>数据文件</h3>
       <div class="settings-row">
         <span class="label">配置目录</span>
-        <span class="value" id="configDirPath">—</span>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <span class="value" id="configDirPath">${esc(configDir) || "—"}</span>
+          <button class="btn btn-sm pill" id="changeConfigDirBtn">重新选择</button>
+        </div>
       </div>
     </div>
   `;
@@ -793,6 +797,17 @@ export async function renderSettingsPage() {
       } else {
         show("error", "恢复失败");
       }
+    }
+  });
+
+  document.getElementById("changeConfigDirBtn")?.addEventListener("click", async () => {
+    const result = await api.selectConfigDir();
+    if (result && !result.canceled && result.filePaths.length > 0) {
+      const dir = result.filePaths[0];
+      await api.setConfigDir(dir);
+      show("success", "配置目录已更新，已重新加载配置");
+      renderSettingsPage();
+      await loadProfiles();
     }
   });
 }

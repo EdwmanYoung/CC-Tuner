@@ -54,6 +54,7 @@ export function registerConfigHandlers(
         apiKey,
         model: profile.model,
         timeout: profile.timeout,
+        env: profile.env,
       });
 
       // Set as active

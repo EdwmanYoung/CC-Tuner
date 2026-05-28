@@ -1,4 +1,4 @@
-import { app, BrowserWindow } from "electron";
+import { app, BrowserWindow, dialog, ipcMain } from "electron";
 import { join } from "path";
 import { existsSync } from "fs";
 import {
@@ -14,6 +14,16 @@ import {
 import { registerIpcHandlers } from "./ipc";
 
 let mainWindow: BrowserWindow | null = null;
+let settingsStore: SettingsStore;
+
+// Service instances (re-created when config dir changes)
+let profileManager: ProfileManager | null = null;
+let configManager: ConfigManager | null = null;
+let securityService: SecurityService | null = null;
+let validatorService: ValidatorService | null = null;
+let backupManager: BackupManager | null = null;
+let shellService: ShellService | null = null;
+let historyManager: HistoryManager | null = null;
 
 function createWindow(): void {
   console.log("[Main] Creating BrowserWindow...");
@@ -58,27 +68,102 @@ function createWindow(): void {
   });
 }
 
-let settingsStore: SettingsStore;
+async function getConfigDir(): Promise<string> {
+  const saved = await settingsStore.load();
+  if (saved.configDir && existsSync(saved.configDir)) {
+    console.log(`[Config] Using saved config directory: ${saved.configDir}`);
+    return saved.configDir;
+  }
+  return "";
+}
 
-async function initializeServices(): Promise<void> {
+/**
+ * Read existing settings.json and create an initial "默认配置" profile
+ * if no profiles exist yet.
+ */
+async function importInitialProfile(configDir: string): Promise<void> {
+  if (!configDir || !profileManager || !configManager || !securityService || !historyManager) {
+    return;
+  }
+
+  // Only import if no profiles exist yet
+  const existing = await profileManager.list();
+  if (existing.length > 0) {
+    console.log("[Config] Profiles already exist, skipping auto-import");
+    return;
+  }
+
+  // Read settings.json and extract env
+  const profile = await configManager.extractProfile();
+  if (!profile.hasConfig) {
+    console.log("[Config] settings.json has no env content, skipping auto-import");
+    return;
+  }
+
+  // Extract key fields for the profile
+  const env = profile.env;
+  const model = env["ANTHROPIC_MODEL"] || "";
+  const baseUrl = env["ANTHROPIC_BASE_URL"] || "";
+  const apiKey = env["ANTHROPIC_AUTH_TOKEN"] || "";
+
+  if (!model && !baseUrl) {
+    console.log("[Config] No model/baseUrl found in settings.json, skipping auto-import");
+    return;
+  }
+
+  // Encrypt API key
+  const encryptedKey = apiKey ? securityService.encrypt(apiKey) : undefined;
+
+  // Create initial profile
+  const created = await profileManager.create({
+    name: "默认配置",
+    provider: "custom",
+    baseUrl: baseUrl || "https://api.anthropic.com",
+    encryptedApiKey: encryptedKey,
+    model: model || "claude-sonnet-4-20250514",
+    timeout: 0,
+    env: env,
+  });
+
+  // Set as active
+  await profileManager.setActive(created.id);
+
+  // Log history
+  await historyManager.appendEntry(
+    "create",
+    created.id,
+    created.name,
+    `Auto-imported from existing settings.json`,
+  );
+
+  console.log(`[Config] Auto-imported initial profile "${created.name}" from settings.json`);
+}
+
+/**
+ * Initialize or re-initialize all config-dependent services.
+ * Called on startup and when config dir changes.
+ */
+async function initConfigServices(configDir: string): Promise<void> {
   const userDataPath = app.getPath("userData");
-  settingsStore = new SettingsStore(userDataPath);
-  const configDir = await getConfigDir();
 
-  const profileManager = new ProfileManager(userDataPath);
-  const configManager = new ConfigManager(configDir);
-  const securityService = new SecurityService();
-  const validatorService = new ValidatorService();
-  const backupManager = new BackupManager(
+  profileManager = new ProfileManager(userDataPath);
+  configManager = new ConfigManager(configDir);
+  securityService = new SecurityService();
+  validatorService = new ValidatorService();
+  backupManager = new BackupManager(
     join(userDataPath, "backups"),
     configDir,
   );
-  const shellService = new ShellService();
-  const historyManager = new HistoryManager(userDataPath);
+  shellService = new ShellService();
+  historyManager = new HistoryManager(userDataPath);
 
   console.log(`[Config] Config directory: ${configDir || "(none)"}`);
   console.log(`[Config] User data path: ${userDataPath}`);
 
+  // Auto-import initial profile from settings.json
+  await importInitialProfile(configDir);
+
+  // Register all IPC handlers
   registerIpcHandlers(
     profileManager,
     configManager,
@@ -89,8 +174,13 @@ async function initializeServices(): Promise<void> {
     historyManager,
   );
 
-  // Settings & dialog IPC handlers
-  const { ipcMain, dialog } = require("electron");
+  registerSystemIpcHandlers();
+}
+
+function registerSystemIpcHandlers(): void {
+  ipcMain.removeHandler("settings:get-config-dir");
+  ipcMain.removeHandler("settings:set-config-dir");
+  ipcMain.removeHandler("dialog:select-config-dir");
 
   ipcMain.handle("settings:get-config-dir", async () => {
     const s = await settingsStore.load();
@@ -99,6 +189,7 @@ async function initializeServices(): Promise<void> {
 
   ipcMain.handle("settings:set-config-dir", async (_event: unknown, dir: string) => {
     await settingsStore.set("configDir", dir);
+    await initConfigServices(dir);
     return true;
   });
 
@@ -119,27 +210,25 @@ async function initializeServices(): Promise<void> {
     const selectedDir = result.filePaths[0];
     await settingsStore.set("configDir", selectedDir);
     console.log(`[Config] Selected config directory: ${selectedDir}`);
+
+    // Re-init services with new config dir
+    await initConfigServices(selectedDir);
+
     return result;
   });
 
-  // System IPC handlers
   ipcMain.handle("system:encryption-available", () =>
-    securityService.isEncryptionAvailable(),
+    securityService?.isEncryptionAvailable() ?? false,
   );
   ipcMain.handle("system:get-version", () => app.getVersion());
 }
 
-async function getConfigDir(): Promise<string> {
-  const saved = await settingsStore.load();
-  if (saved.configDir && existsSync(saved.configDir)) {
-    console.log(`[Config] Using saved config directory: ${saved.configDir}`);
-    return saved.configDir;
-  }
-  return "";
-}
-
 app.whenReady().then(async () => {
-  await initializeServices();
+  const userDataPath = app.getPath("userData");
+  settingsStore = new SettingsStore(userDataPath);
+
+  const configDir = await getConfigDir();
+  await initConfigServices(configDir);
   createWindow();
 
   app.on("activate", () => {

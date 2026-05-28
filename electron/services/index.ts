@@ -1,4 +1,4 @@
-export { ConfigManager, type ProfileCore } from "./config-manager";
+export { ConfigManager, type ProfileCore, type ExtractedProfile } from "./config-manager";
 export { ProfileManager } from "./profile-manager";
 export { SecurityService } from "./security";
 export { ValidatorService } from "./validator";
