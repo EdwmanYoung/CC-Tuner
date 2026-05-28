@@ -40,6 +40,22 @@ function findClaudeCli(): boolean {
   }
 }
 
+/**
+ * Launch a new visible Windows console window running the given command line.
+ *
+ * Creates a new cmd.exe process that first `cd`s to the work directory,
+ * then runs `claude`. The new console stays open after claude exits.
+ */
+function launchConsoleWindow(cwd: string): void {
+  spawn("cmd.exe", ["/k", "claude"], {
+    detached: true,
+    cwd,
+    stdio: "ignore",
+    windowsHide: false,
+    windowsVerbatimArguments: true,
+  }).unref();
+}
+
 export class ShellService {
   async openClaude(): Promise<{ ok: boolean; message: string }> {
     return this.openClaudeInDir("");
@@ -74,7 +90,7 @@ export class ShellService {
     }
   }
 
-  /** Windows-specific Claude launch with fallback chain */
+  /** Windows-specific Claude launch */
   private async _openClaudeWindows(workDir: string): Promise<{ ok: boolean; message: string }> {
     const hasClaude = findClaudeCli();
     if (!hasClaude) {
@@ -86,39 +102,15 @@ export class ShellService {
     }
 
     const cwd = workDir || process.cwd();
-    const gitBashPath = findGitBash();
 
-    if (!gitBashPath) {
-      // Fallback: plain cmd.exe window
-      spawn("cmd.exe", ["/c", "start", "Claude Code", "cmd", "/k", `cd /d "${cwd}" && claude`], {
-        detached: true,
-        stdio: "ignore",
-        windowsHide: false,
-      }).unref();
-      return {
-        ok: true,
-        message: workDir ? `已在 ${workDir} 启动 Claude Code` : "Claude Code terminal opened",
-      };
-    }
-
-    // Git Bash: use `cmd /c start` to open a visible window, --cd to enter
-    // the work directory, then winpty to bridge mintty with claude's TUI.
-    // winpty is bundled with Git for Windows (usr/bin/winpty.exe).
-    const gitRoot = gitBashPath.replace(/\\git-bash\.exe$/, "");
-    const winptyPath = `${gitRoot}\\usr\\bin\\winpty.exe`;
-    const winptyCmd = existsSync(winptyPath) ? `"${winptyPath}"` : "winpty";
-    const bashDir = workDir ? `--cd="${workDir}"` : "";
-
-    const startCmd = `start "" "${gitBashPath}" ${bashDir} -c "${winptyCmd} claude"`;
-    spawn("cmd.exe", ["/c", startCmd], {
-      detached: true,
-      stdio: "ignore",
-      windowsHide: false,
-    }).unref();
+    // Launch a new Windows console (conhost) with claude in the work directory.
+    // cmd.exe /k runs claude and keeps the window open after it exits.
+    // The `cwd` option ensures we start in the correct directory.
+    launchConsoleWindow(cwd);
 
     return {
       ok: true,
-      message: workDir ? `已在 ${workDir} 启动 Claude Code (Git Bash)` : "Claude Code terminal opened (Git Bash)",
+      message: workDir ? `已在 ${workDir} 启动 Claude Code` : "Claude Code terminal opened",
     };
   }
 }
