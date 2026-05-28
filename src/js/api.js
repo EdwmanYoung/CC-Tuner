@@ -92,3 +92,7 @@ export async function windowMaximize() {
 export async function windowClose() {
   return api.win.close();
 }
+
+export async function windowIsMaximized() {
+  return api.win.isMaximized();
+}

@@ -8,14 +8,28 @@ import * as api from "./api.js";
 // Initialize
 document.addEventListener("DOMContentLoaded", () => {
   // Window controls
+  const maximizeBtn = document.querySelector('[data-action="maximize"]');
+
   document.querySelectorAll(".win-btn").forEach((btn) => {
     btn.addEventListener("click", async () => {
       const action = btn.dataset.action;
       if (action === "minimize") await api.windowMinimize();
-      else if (action === "maximize") await api.windowMaximize();
+      else if (action === "maximize") {
+        await api.windowMaximize();
+        updateMaximizeIcon();
+      }
       else if (action === "close") await api.windowClose();
     });
   });
+
+  // Update maximize button icon based on window state
+  async function updateMaximizeIcon() {
+    const isMax = await api.windowIsMaximized();
+    const svgIcon = isMax
+      ? '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="6" y="6" width="18" height="18" rx="2"/><rect x="0" y="0" width="18" height="18" rx="2"/></svg>'
+      : '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>';
+    maximizeBtn.innerHTML = svgIcon;
+  }
 
   // Theme
   initTheme();

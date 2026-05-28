@@ -61,5 +61,8 @@ contextBridge.exposeInMainWorld("api", {
     minimize: () => ipcRenderer.invoke("window:minimize"),
     maximize: () => ipcRenderer.invoke("window:maximize"),
     close: () => ipcRenderer.invoke("window:close"),
+    isMaximized: () => ipcRenderer.invoke("window:is-maximized"),
+    onMaximizeChange: (cb: (maximized: boolean) => void) =>
+      ipcRenderer.on("window:maximize-change", (_e, maximized: boolean) => cb(maximized)),
   },
 });

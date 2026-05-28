@@ -233,16 +233,22 @@ function registerSystemIpcHandlers(): void {
 
   ipcMain.handle("window:maximize", () => {
     const win = BrowserWindow.getFocusedWindow() || mainWindow;
-    if (win?.isMaximized()) {
+    if (!win) return;
+    if (win.isMaximized()) {
       win.unmaximize();
     } else {
-      win?.maximize();
+      win.maximize();
     }
   });
 
   ipcMain.handle("window:close", () => {
     const win = BrowserWindow.getFocusedWindow() || mainWindow;
     win?.close();
+  });
+
+  ipcMain.handle("window:is-maximized", () => {
+    const win = BrowserWindow.getFocusedWindow() || mainWindow;
+    return win?.isMaximized() ?? false;
   });
 }
 
