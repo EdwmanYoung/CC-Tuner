@@ -54,10 +54,10 @@ export class ShellService {
 
         if (workDir) {
           const escapedDir = workDir.replace(/"/g, '\\"');
-          // git-bash.exe --cd=<dir> opens in the specified directory
-          await execAsync(`"${gitBashPath}" --cd="${escapedDir}"`);
+          // git-bash.exe -c runs a command and keeps the window open for interactive CLIs
+          await execAsync(`"${gitBashPath}" -c "cd '${escapedDir}' && claude"`);
         } else {
-          await execAsync(`"${gitBashPath}"`);
+          await execAsync(`"${gitBashPath}" -c "claude"`);
         }
       } else if (os === "darwin") {
         const cmd = workDir ? `cd "${workDir}" && claude` : "claude";
