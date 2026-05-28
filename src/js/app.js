@@ -1,4 +1,5 @@
 // App entry point
+console.log("[Renderer] app.js loaded");
 import { get, set } from "./state.js";
 import { initSidebar, navigateTo, renderProfilesPage, renderHistoryPage, renderSettingsPage, showEditorPage, showDetailPage, loadProfiles } from "./renderers.js";
 import { initTheme, toggleTheme } from "./theme.js";

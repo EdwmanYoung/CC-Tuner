@@ -45,8 +45,21 @@ function createWindow(): void {
     console.error(`[Main] Page failed to load: ${code} - ${desc}`);
   });
 
+  mainWindow.webContents.on("did-finish-load", () => {
+    console.log("[Main] Page finished loading");
+  });
+
+  mainWindow.webContents.on("dom-ready", () => {
+    console.log("[Main] DOM ready");
+  });
+
   mainWindow.webContents.on("crashed", () => {
     console.error("[Main] Renderer crashed");
+  });
+
+  mainWindow.webContents.on("console-message", (_event, level, message) => {
+    const prefix = ["VERBOSE", "INFO", "WARN", "ERROR"][level] || "LOG";
+    console.log(`[Renderer ${prefix}] ${message}`);
   });
 
   if (process.env.NODE_ENV === "development" || !app.isPackaged) {
@@ -54,7 +67,12 @@ function createWindow(): void {
     mainWindow.loadURL("http://localhost:4322");
     mainWindow.webContents.openDevTools();
   } else {
-    mainWindow.loadFile(join(__dirname, "../dist/index.html"));
+    const indexPath = join(__dirname, "../dist/index.html");
+    console.log("[Main] Loading packaged index:", indexPath);
+    console.log("[Main] __dirname:", __dirname);
+    mainWindow.loadFile(indexPath);
+    // Open DevTools in packaged mode for debugging
+    mainWindow.webContents.openDevTools({ mode: "detach" });
   }
 
   mainWindow.once("ready-to-show", () => {
