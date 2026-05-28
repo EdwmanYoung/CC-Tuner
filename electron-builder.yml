@@ -15,3 +15,5 @@ win:
     - target: dir
       arch: [x64]
   sign: null
+
+afterSign: null
