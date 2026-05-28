@@ -81,18 +81,15 @@ export async function getVersion() {
   return api.system.getVersion();
 }
 
-export async function windowMinimize() {
-  return api.win.minimize();
+function _winCall(method) {
+  if (!api?.win?.[method]) {
+    console.error(`[WindowCtrl] api.win.${method} not available — preload may not be loaded`);
+    return;
+  }
+  return api.win[method]();
 }
 
-export async function windowMaximize() {
-  return api.win.maximize();
-}
-
-export async function windowClose() {
-  return api.win.close();
-}
-
-export async function windowIsMaximized() {
-  return api.win.isMaximized();
-}
+export function windowMinimize() { return _winCall("minimize"); }
+export function windowMaximize() { return _winCall("maximize"); }
+export function windowClose()    { return _winCall("close"); }
+export function windowIsMaximized() { return _winCall("isMaximized"); }

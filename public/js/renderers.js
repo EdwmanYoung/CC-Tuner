@@ -1,8 +1,30 @@
 // DOM rendering (replaces Vue components)
 import { get, set } from "./state.js";
 import * as api from "./api.js";
-import { getProviderEmoji, shortHost, formatDate } from "./providers.js";
+import { getProviderIcon, shortHost, formatDate } from "./providers.js";
 import { show } from "./toaster.js";
+
+// ========== Lucide-style SVG icons (2px stroke, rounded) ==========
+
+const ICON_GEAR = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15a3 3 0 1 0 0-6 3 3 0 0 0 0 6Z"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9c.26.604.852.997 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1Z"/></svg>';
+
+const ICON_SEARCH = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>';
+
+const ICON_HISTORY = '<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l4 2"/></svg>';
+
+const ICON_EYE = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0"/><circle cx="12" cy="12" r="3"/></svg>';
+
+const ICON_EYE_OFF = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49"/><path d="M14.084 14.158a3 3 0 0 1-4.242-4.242"/><path d="M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143"/><path d="m2 2 20 20"/></svg>';
+
+const ICON_X = '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="m6 6 12 12"/></svg>';
+
+const ICON_PLUS = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"/><path d="M12 5v14"/></svg>';
+
+const ICON_EDIT = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.37 2.63 14 7l-4 4 .01.01L7 14l-1 4 4-1 3-3 .01.01 4-4 4.37-4.37a2.12 2.12 0 1 0-3-3Z"/><path d="M9 8c-2 3-4 3.5-7 4l8-10c-1 3-1 4-1 6Z"/></svg>';
+
+const ICON_TRASH = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/><line x1="10" x2="10" y1="11" y2="17"/><line x1="14" x2="14" y1="11" y2="17"/></svg>';
+
+const ICON_REFRESH = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 16h5v5"/></svg>';
 
 // ========== Sidebar ==========
 
@@ -44,7 +66,7 @@ export function renderProfilesPage() {
   if (!profiles || profiles.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="icon">⚙</div>
+        <div class="icon">${ICON_GEAR}</div>
         <h3>暂无配置方案</h3>
         <p>点击「新建方案」创建第一个配置方案</p>
       </div>
@@ -64,7 +86,7 @@ export function renderProfilesPage() {
   if (filtered.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="icon">🔍</div>
+        <div class="icon">${ICON_SEARCH}</div>
         <h3>无匹配结果</h3>
         <p>没有匹配 "${esc(search)}" 的配置方案</p>
       </div>
@@ -78,7 +100,7 @@ export function renderProfilesPage() {
       return `
       <div class="profile-card ${isActive ? "active" : ""}" data-id="${p.id}">
         <div class="card-header">
-          <span class="card-title">${getProviderEmoji(p.provider)} ${esc(p.name)}</span>
+          <span class="card-title">${getProviderIcon(p.provider)} ${esc(p.name)}</span>
           ${isActive ? '<span class="card-badge">使用中</span>' : ""}
         </div>
         <div class="card-info">
@@ -298,7 +320,7 @@ export function showEditorPage(profileId = null) {
           ${capHtml}
           <div class="api-key-wrapper">
             <input class="form-input env-input" id="env_${field.key}" type="${inputType}" placeholder="${field.placeholder}" value="${esc(val)}" autocomplete="off" spellcheck="false" />
-            ${isPassword ? '<button class="eye-toggle" type="button">👁</button>' : ""}
+            ${isPassword ? `<button class="eye-toggle" type="button">${ICON_EYE}</button>` : ""}
           </div>
         </div>
       `;
@@ -394,7 +416,7 @@ export function showEditorPage(profileId = null) {
       const input = wrapper.querySelector("input");
       const isPassword = input.type === "password";
       input.type = isPassword ? "text" : "password";
-      btn.textContent = isPassword ? "🙈" : "👁";
+      btn.innerHTML = isPassword ? ICON_EYE_OFF : ICON_EYE;
     });
   });
 
@@ -411,7 +433,7 @@ function buildEnvRowHtml(key = "", value = "") {
   return `<tr>
     <td><input class="env-key form-input" value="${esc(key)}" placeholder="变量名" spellcheck="false" /></td>
     <td><input class="env-value form-input" value="${esc(value)}" placeholder="值" /></td>
-    <td><button class="delete-env-btn" type="button">✕</button></td>
+    <td><button class="delete-env-btn" type="button">${ICON_X}</button></td>
   </tr>`;
 }
 
@@ -615,7 +637,7 @@ export function showDetailPage(profileId) {
   container.innerHTML = `
     <div class="detail-card">
       <div class="detail-hero">
-        <h2>${getProviderEmoji(profile.provider)} ${esc(profile.name)}</h2>
+        <h2>${getProviderIcon(profile.provider)} ${esc(profile.name)}</h2>
         <div class="provider">${PROVIDER_NAME(profile.provider)}</div>
       </div>
       <div class="detail-sections">
@@ -683,7 +705,7 @@ export async function renderHistoryPage() {
   if (!entries || entries.length === 0) {
     container.innerHTML = `
       <div class="empty-state">
-        <div class="icon">📋</div>
+        <div class="icon">${ICON_HISTORY}</div>
         <h3>暂无操作历史</h3>
         <p>创建、编辑或切换方案后会显示在这里</p>
       </div>
@@ -713,13 +735,20 @@ export async function renderHistoryPage() {
 }
 
 function ACTION_LABEL(action) {
-  const map = {
-    create: "➕ 创建",
-    update: "✏️ 编辑",
-    delete: "🗑️ 删除",
-    switch: "🔄 切换",
+  const icons = {
+    create: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><path d="M12 5v14M5 12h14" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/></svg>`,
+    update: ICON_EDIT,
+    delete: `<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18"/><path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"/><path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"/></svg>`,
+    switch: ICON_REFRESH,
   };
-  return map[action] || action;
+  const icon = icons[action] || ICON_REFRESH;
+  const labels = {
+    create: "创建",
+    update: "编辑",
+    delete: "删除",
+    switch: "切换",
+  };
+  return `${icon} ${labels[action] || action}`;
 }
 
 // ========== Settings Page ==========

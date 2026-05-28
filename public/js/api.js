@@ -80,3 +80,16 @@ export async function encryptionAvailable() {
 export async function getVersion() {
   return api.system.getVersion();
 }
+
+function _winCall(method) {
+  if (!api?.win?.[method]) {
+    console.error(`[WindowCtrl] api.win.${method} not available — preload may not be loaded`);
+    return;
+  }
+  return api.win[method]();
+}
+
+export function windowMinimize() { return _winCall("minimize"); }
+export function windowMaximize() { return _winCall("maximize"); }
+export function windowClose()    { return _winCall("close"); }
+export function windowIsMaximized() { return _winCall("isMaximized"); }

@@ -12,15 +12,28 @@ document.addEventListener("DOMContentLoaded", () => {
   const maximizeBtn = document.querySelector('[data-action="maximize"]');
 
   document.querySelectorAll(".win-btn").forEach((btn) => {
-    btn.addEventListener("click", async () => {
+    btn.addEventListener("click", async (e) => {
+      e.stopPropagation();
       const action = btn.dataset.action;
-      if (action === "minimize") await api.windowMinimize();
-      else if (action === "maximize") {
-        await api.windowMaximize();
-        updateMaximizeIcon();
+      console.log("[WindowCtrl] Clicked:", action);
+      try {
+        if (action === "minimize") await api.windowMinimize();
+        else if (action === "maximize") {
+          await api.windowMaximize();
+          updateMaximizeIcon();
+        }
+        else if (action === "close") await api.windowClose();
+      } catch (err) {
+        console.error("[WindowCtrl] Error:", err);
       }
-      else if (action === "close") await api.windowClose();
     });
+  });
+
+  // Verify api chain
+  console.log("[WindowCtrl] api chain:", {
+    hasWindowApi: !!window.api,
+    hasWin: !!window.api?.win,
+    hasMinimize: !!window.api?.win?.minimize,
   });
 
   // Update maximize button icon based on window state
